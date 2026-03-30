@@ -1,0 +1,1021 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="mobile-web-app-capable" content="yes">
+<title>图2-17 膜片弹簧工作点位置设定 · 汽车设计第2章（📱移动端兼容）</title>
+<style>
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+body { 
+  font-family: "Microsoft YaHei","PingFang SC",sans-serif; 
+  background:#f0f2f5; 
+  color:#1e2a35;
+  -webkit-font-smoothing: antialiased;
+  -webkit-tap-highlight-color: transparent;
+}
+
+header {
+  background:#1a2744; color:#fff; padding:12px 24px;
+  display:flex; align-items:baseline; gap:14px; flex-wrap:wrap;
+}
+header h1 { font-size:17px; font-weight:500; }
+header span { font-size:12px; color:#b0bec5; }
+
+.wrap { max-width:1120px; margin:0 auto; padding:16px 14px 36px; }
+
+/* ── 步骤条 ── */
+.steps { display:flex; gap:0; margin-bottom:14px; border-radius:8px;
+         overflow:hidden; border:1px solid #dde3ec; }
+.step-btn {
+  flex:1; padding:8px 4px; text-align:center; font-size:12px;
+  background:#fff; border:none; cursor:pointer; color:#546070;
+  border-right:1px solid #dde3ec; transition:all .15s; line-height:1.4;
+  -webkit-tap-highlight-color: transparent;
+  touch-action: manipulation;
+}
+.step-btn:last-child { border-right:none; }
+.step-btn.active { background:#1a2744; color:#fff; font-weight:500; }
+.step-btn:hover:not(.active) { background:#f0f2f5; }
+
+/* ── 主布局 ── */
+.layout { display:grid; grid-template-columns:288px 1fr; gap:14px; }
+@media(max-width:700px){ .layout{ grid-template-columns:1fr; } }
+
+/* ── 卡片 ── */
+.card { background:#fff; border-radius:10px; border:1px solid #dde3ec;
+        padding:14px 16px; margin-bottom:12px; }
+.card-title { font-size:12.5px; font-weight:500; color:#546070;
+              margin-bottom:10px; padding-bottom:7px; border-bottom:1px solid #f0f2f5; }
+
+/* ── 控件 ── */
+.ctrl { margin-bottom:10px; }
+.ctrl-head { display:flex; justify-content:space-between; align-items:baseline;
+             font-size:12px; color:#546070; margin-bottom:3px; }
+.ctrl-head span { font-size:12px; font-weight:500; color:#1e2a35; }
+input[type=range] { 
+  width:100%; height:4px; accent-color:#378ADD; cursor:pointer; display:block;
+  -webkit-appearance: none;
+  appearance: none;
+  background: #dde3ec;
+  border-radius: 2px;
+  touch-action: none;
+}
+input[type=range]::-webkit-slider-thumb {
+  -webkit-appearance: none;
+  appearance: none;
+  width: 16px;
+  height: 16px;
+  border-radius: 50%;
+  background: #378ADD;
+  cursor: pointer;
+}
+input[type=range]::-moz-range-thumb {
+  width: 16px;
+  height: 16px;
+  border-radius: 50%;
+  background: #378ADD;
+  cursor: pointer;
+  border: none;
+}
+input[type=number] {
+  width:100%; padding:5px 8px; border:1px solid #c8d0db; border-radius:6px;
+  font-size:13px; color:#1e2a35; background:#fff; margin-top:3px;
+}
+select {
+  width:100%; padding:5px 8px; border:1px solid #c8d0db; border-radius:6px;
+  font-size:12px; color:#1e2a35; background:#fff; margin-top:3px; cursor:pointer;
+}
+
+/* ── 提示框 ── */
+.ib { border-radius:7px; padding:8px 11px; font-size:11.5px;
+      line-height:1.65; margin-bottom:8px; }
+.ib-blue   { background:#e6f1fb; border-left:3px solid #378ADD; color:#0c447c; }
+.ib-green  { background:#eaf3de; border-left:3px solid #639922; color:#173404; }
+.ib-red    { background:#fcebeb; border-left:3px solid #E24B4A; color:#501313; }
+.ib-amber  { background:#faeeda; border-left:3px solid #EF9F27; color:#412402; }
+.ib-gray   { background:#f5f6f8; border-left:3px solid #aaa;   color:#333;   }
+
+/* ── 数据格 ── */
+.kv-grid { display:grid; grid-template-columns:1fr 1fr; gap:7px; margin-top:8px; }
+.kv { background:#f5f6f8; border-radius:7px; padding:8px 10px; font-size:11.5px; }
+.kv .lbl { color:#546070; margin-bottom:2px; }
+.kv .val { font-size:15px; font-weight:500; font-variant-numeric:tabular-nums; }
+
+/* ── 图例 ── */
+.legend { display:flex; flex-wrap:wrap; gap:7px 13px;
+          font-size:11px; color:#546070; margin-bottom:10px; }
+.legend span { display:flex; align-items:center; gap:4px; }
+.ld  { width:18px; height:3px; border-radius:1px; flex-shrink:0; }
+.ld2 { width:9px;  height:9px; border-radius:50%; flex-shrink:0; }
+
+/* ── Canvas ── */
+.canvas-wrap { 
+  position:relative; 
+  width:100%; 
+  overflow-x: auto;
+  -webkit-overflow-scrolling: touch;
+}
+canvas { 
+  display:block; 
+  width:100%; 
+  border-radius:8px;
+  touch-action: pan-y;
+}
+.ann { text-align:center; font-size:12px; color:#546070; margin-top:8px; min-height:16px; }
+
+/* ── 综合评分表 ── */
+.score-tbl { width:100%; border-collapse:collapse; font-size:12px; margin-top:6px; }
+.score-tbl th { background:#f0f2f5; padding:6px 8px; text-align:left; font-weight:500; }
+.score-tbl td { padding:6px 8px; border-bottom:1px solid #f5f6f8; }
+
+/* ── 移动端优化 ── */
+@media (max-width: 700px) {
+  header { padding: 10px 16px; }
+  header h1 { font-size: 15px; }
+  header span { font-size: 11px; }
+  .wrap { padding: 14px 12px 30px; }
+  .card { padding: 12px 14px; }
+  .card-title { font-size: 12px; }
+  .step-btn { padding: 7px 3px; font-size: 11px; }
+  .ctrl { margin-bottom: 9px; }
+  .ctrl-head { font-size: 11px; }
+  .ctrl-head span { font-size: 11px; }
+  input[type=number], select { font-size: 12px; }
+  .ib { font-size: 11px; padding: 7px 10px; }
+  .kv { font-size: 11px; padding: 7px 9px; }
+  .kv .val { font-size: 14px; }
+  .legend { font-size: 10px; gap: 6px 10px; }
+  .ann { font-size: 11px; }
+  .score-tbl { font-size: 11px; }
+  .score-tbl th, .score-tbl td { padding: 5px 7px; }
+}
+user-select: none
+</style>
+</head>
+<body>
+
+<header>
+  <h1>图 2-17 · 膜片弹簧工作点位置设定</h1>
+  <span>《汽车设计》第6版 · 第二章 · 完全离线 · 双击即用</span>
+</header>
+
+<div class="wrap">
+
+  <!-- 步骤条 -->
+  <div class="steps">
+    <button class="step-btn active" onclick="setStep(0)">① 弹簧参数 &amp; 特性曲线</button>
+    <button class="step-btn"        onclick="setStep(1)">② 设定 B 接合点</button>
+    <button class="step-btn"        onclick="setStep(2)">③ 设定 C 分离点</button>
+    <button class="step-btn"        onclick="setStep(3)">④ 综合评估</button>
+  </div>
+
+  <div class="layout">
+
+    <!-- ══════ 左侧控制面板 ══════ -->
+    <div>
+
+      <!-- Step 0 ── 弹簧参数 -->
+      <div id="p0" class="card">
+        <div class="card-title">弹簧基本参数</div>
+        <div class="ctrl">
+          <div class="ctrl-head">H/h 高厚比 <span id="v-hh">1.70</span></div>
+          <input type="range" min="1.2" max="2.8" step="0.05" value="1.7"
+                 id="sl-hh" oninput="onParam()">
+        </div>
+        <div class="ctrl">
+          <div class="ctrl-head">h 板厚（mm）<span id="v-h">3.0</span></div>
+          <input type="range" min="1.5" max="5.0" step="0.1" value="3.0"
+                 id="sl-h" oninput="onParam()">
+        </div>
+        <div class="ctrl">
+          <div class="ctrl-head">R/r 半径比 <span id="v-rr">1.60</span></div>
+          <input type="range" min="1.2" max="2.0" step="0.05" value="1.60"
+                 id="sl-rr" oninput="onParam()">
+        </div>
+        <div id="p0-info" class="ib ib-blue" style="margin-top:6px;"></div>
+      </div>
+
+      <!-- Step 1 ── B点 -->
+      <div id="p1" class="card" style="display:none">
+        <div class="card-title">② 设定 B 点（新离合器接合工作点）</div>
+        <div class="ib ib-amber">
+          <b>教材准则：</b>B 点取在 M 与 H 之间，靠近或在 H 点处。<br>
+          <b>λ<sub>1B</sub> = (0.8 ~ 1.0) · λ<sub>1H</sub></b>
+        </div>
+        <div class="ctrl" style="margin-top:8px">
+          <div class="ctrl-head">k<sub>B</sub> = λ<sub>1B</sub>/λ<sub>1H</sub>
+            <span id="v-kb">0.90</span></div>
+          <input type="range" min="0.50" max="1.30" step="0.01" value="0.90"
+                 id="sl-kb" oninput="onBChange()">
+        </div>
+        <div class="ctrl">
+          <div class="ctrl-head">Δλ 摩擦片最大磨损量（mm）
+            <span id="v-dlam">1.50</span></div>
+          <input type="range" min="0.3" max="3.0" step="0.1" value="1.5"
+                 id="sl-dlam" oninput="onBChange()">
+        </div>
+        <!-- 也允许直接数字输入 -->
+        <div class="ctrl">
+          <div class="ctrl-head" style="margin-bottom:3px">或直接输入 Δλ（mm）</div>
+          <input type="number" min="0.1" max="5" step="0.1" value="1.5"
+                 id="num-dlam" oninput="onDlamInput()">
+        </div>
+        <div id="p1-info" class="ib" style="margin-top:6px;"></div>
+        <div class="kv-grid">
+          <div class="kv"><div class="lbl">λ<sub>1B</sub></div>
+            <div class="val" id="kv-lam1B">—</div></div>
+          <div class="kv"><div class="lbl">F<sub>1B</sub></div>
+            <div class="val" id="kv-F1B" style="color:#1a6b80">—</div></div>
+          <div class="kv"><div class="lbl">λ<sub>1A</sub> = λ<sub>1B</sub>−Δλ</div>
+            <div class="val" id="kv-lam1A">—</div></div>
+          <div class="kv"><div class="lbl">F<sub>1A</sub></div>
+            <div class="val" id="kv-F1A" style="color:#1a6b80">—</div></div>
+          <div class="kv"><div class="lbl">压紧力波动</div>
+            <div class="val" id="kv-dF">—</div></div>
+          <div class="kv"><div class="lbl">Δλ</div>
+            <div class="val" id="kv-dlam2" style="color:#185fa5">—</div></div>
+        </div>
+      </div>
+
+      <!-- Step 2 ── C点 -->
+      <div id="p2" class="card" style="display:none">
+        <div class="card-title">③ 设定 C 点（分离工作点）</div>
+        <div class="ib ib-blue">
+          <b>教材准则：</b>分离时工作点从 B 变到 C，为减小踏板力，<b>C 点应尽量靠近 N 点</b>（极小值点）。
+        </div>
+        <div class="ctrl" style="margin-top:8px">
+          <div class="ctrl-head">k<sub>C</sub> = λ<sub>1C</sub>/λ<sub>1N</sub>
+            <span id="v-kc">0.92</span></div>
+          <input type="range" min="0.60" max="1.20" step="0.01" value="0.92"
+                 id="sl-kc" oninput="onCChange()">
+        </div>
+
+        <!-- 杠杆几何参数 -->
+        <div style="border-top:1px solid #f0f2f5; margin:10px 0 8px; padding-top:8px;">
+          <div class="card-title" style="margin-bottom:8px; border:none; padding:0">
+            杠杆几何参数（式 2-22、2-23）
+          </div>
+          <div class="ctrl">
+            <div class="ctrl-head">R₁ 压盘加载点半径（mm）<span id="v-R1">82</span></div>
+            <input type="range" min="60" max="120" step="1" value="82"
+                   id="sl-R1" oninput="onLeverChange()">
+          </div>
+          <div class="ctrl">
+            <div class="ctrl-head">r₁ 支承环加载点半径（mm）<span id="v-r1">54</span></div>
+            <input type="range" min="30" max="90" step="1" value="54"
+                   id="sl-r1" oninput="onLeverChange()">
+          </div>
+          <div class="ctrl">
+            <div class="ctrl-head">r_f 分离轴承接触半径（mm）<span id="v-rf">30</span></div>
+            <input type="range" min="10" max="60" step="1" value="30"
+                   id="sl-rf" oninput="onLeverChange()">
+          </div>
+        </div>
+
+        <!-- 杠杆比实时显示 -->
+        <div id="lever-box" class="ib ib-blue" style="font-size:12px; line-height:1.9"></div>
+
+        <div id="p2-info" class="ib" style="margin-top:6px;"></div>
+        <div class="kv-grid">
+          <div class="kv"><div class="lbl">λ<sub>1C</sub></div>
+            <div class="val" id="kv-lam1C">—</div></div>
+          <div class="kv"><div class="lbl">F<sub>1C</sub> 弹簧力</div>
+            <div class="val" id="kv-F1C">—</div></div>
+          <div class="kv"><div class="lbl">杠杆比 i = (r₁−r_f)/(R₁−r₁)</div>
+            <div class="val" id="kv-lev" style="color:#185fa5">—</div></div>
+          <div class="kv"><div class="lbl">F<sub>2C</sub> = F<sub>1C</sub>/i （踏板力）</div>
+            <div class="val" id="kv-F2C" style="color:#a32d2d">—</div></div>
+          <div class="kv"><div class="lbl">分离行程 λ<sub>1C</sub>−λ<sub>1B</sub></div>
+            <div class="val" id="kv-stroke">—</div></div>
+          <div class="kv"><div class="lbl">λ₂（分离指行程）</div>
+            <div class="val" id="kv-lam2">—</div></div>
+        </div>
+      </div>
+
+      <!-- Step 3 ── 综合 -->
+      <div id="p3" class="card" style="display:none">
+        <div class="card-title">④ 综合评估</div>
+        <div id="p3-content"></div>
+      </div>
+
+      <!-- 常驻：图例 -->
+      <div class="card">
+        <div class="card-title">图例</div>
+        <div class="legend">
+          <span><span class="ld" style="background:#378ADD"></span>F₁ 特性曲线</span>
+          <span><span class="ld" style="background:#E24B4A;border-top:2px dashed #E24B4A;height:0"></span>F₂ 分离力曲线</span>
+          <span><span class="ld2" style="background:#FAC775;outline:2px solid #c04820"></span>M 极大值</span>
+          <span><span class="ld2" style="background:#85B7EB;outline:2px solid #185fa5"></span>H 拐点</span>
+          <span><span class="ld2" style="background:#97C459;outline:2px solid #27500a"></span>N 极小值</span>
+          <span><span class="ld2" style="background:#5DCAA5;outline:2px solid #1a6b80"></span>B 接合点</span>
+          <span><span class="ld2" style="background:#CDE8C0;outline:2px solid #3b6d11"></span>A 磨损后</span>
+          <span><span class="ld2" style="background:#F09595;outline:2px solid #a32d2d"></span>C 分离点</span>
+          <span><span class="ld" style="background:rgba(55,138,221,0.22);border:1px solid #378ADD;height:10px;border-radius:2px"></span>Δλ 磨损区间</span>
+        </div>
+      </div>
+    </div>
+
+    <!-- ══════ 右侧图形 ══════ -->
+    <div>
+      <div class="card">
+        <div class="canvas-wrap">
+          <canvas id="cv" height="500"></canvas>
+        </div>
+        <div class="ann" id="ann"></div>
+      </div>
+      <div id="explain-card" class="card">
+        <div id="explain-body"></div>
+      </div>
+    </div>
+
+  </div>
+</div>
+
+<script>
+// ═══════════════════════════════════════════════════
+// 物理模型
+// ═══════════════════════════════════════════════════
+const E=206000, MU=0.3;
+
+function F1(lam,H,h,R,r,R1,r1){
+  if(lam<=0)return 0;
+  const K=Math.PI*E*h*Math.log(R/r)/(6*(1-MU*MU)*(R1-r1)*(R1-r1));
+  const b=(R-r)/(R1-r1);
+  return K*lam*((H-lam*b)*(H-lam/2*b)+h*h);
+}
+// 式(2-24)：F₂ = f(λ₂)，直接从 λ₂ 计算（用于绘制 F₂ 整条曲线）
+function F2curve(lam1,H,h,R,r,R1,r1,rf){
+  const sp=r1-rf, lam2=lam1*sp/(R1-r1);
+  if(lam2<=0)return 0;
+  const K=Math.PI*E*h*Math.log(R/r)/(6*(1-MU*MU)*sp*sp);
+  const b=(R-r)/sp;
+  return K*lam2*((H-lam2*b)*(H-lam2/2*b)+h*h);
+}
+// 式(2-23)：F₂ = (R₁−r₁)/(r₁−r_f) · F₁  ← 课本原文，F₂ > F₁（杠杆放大）
+function F2fromF1(f1val, R1, r1, rf){
+  const multiplier = (R1 - r1) / (r1 - rf);  // = (R₁−r₁)/(r₁−r_f)，大于1
+  return f1val * multiplier;
+}
+// 杠杆比：课本以 i = (r₁−r_f)/(R₁−r₁) 定义（小于1），则 F₂ = F₁/i
+// 本工具直接用乘数 (R₁−r₁)/(r₁−r_f) 计算，与式(2-23)完全一致
+function leverMultiplier(R1,r1,rf){ return (R1-r1)/(r1-rf); }
+
+function buildCurve(hh,rr,h,R1,r1,rf,N=240){
+  const H=hh*h, R=90, r=R/rr;
+  const maxLam=H*2.6, xs=[],f1s=[],f2s=[];
+  for(let i=0;i<=N;i++){
+    const lam=i/N*maxLam;
+    xs.push(lam);
+    f1s.push(F1(lam,H,h,R,r,R1,r1));
+    f2s.push(F2curve(lam,H,h,R,r,R1,r1,rf));
+  }
+  return {xs,f1s,f2s,H,h,R,r};
+}
+
+// 关键点：M极大、N极小、H拐点=中点
+function keyPts(xs,f1s){
+  // M: 极大值
+  let iM=0;
+  for(let i=1;i<f1s.length-1;i++)
+    if(f1s[i]>f1s[i-1]&&f1s[i]>f1s[i+1]){iM=i;break;}
+  if(!iM) iM=f1s.indexOf(Math.max(...f1s));
+
+  // N: M之后的极小值
+  let iN=iM;
+  for(let i=iM+1;i<f1s.length-1;i++)
+    if(f1s[i]<f1s[i-1]&&f1s[i]<f1s[i+1]){iN=i;break;}
+  if(iN===iM){
+    // 找M之后的最小值
+    let mv=f1s[iM];
+    for(let i=iM;i<f1s.length;i++) if(f1s[i]<mv){mv=f1s[i];iN=i;}
+  }
+
+  // H: 拐点 = (λ1M + λ1N)/2 → 找最近索引
+  const lamH=(xs[iM]+xs[iN])/2;
+  let iH=iM;
+  for(let i=0;i<xs.length;i++) if(Math.abs(xs[i]-lamH)<Math.abs(xs[iH]-lamH)) iH=i;
+
+  return {iM,iH,iN};
+}
+
+// ═══════════════════════════════════════════════════
+// 状态
+// ═══════════════════════════════════════════════════
+const S={
+  hh:1.70, h:3.0, rr:1.60,
+  kB:0.90, dlam:1.5,
+  kC:0.92,
+  R1:82, r1:54, rf:30,   // 杠杆几何参数（可调）
+  step:0,
+  curve:null, keys:null
+};
+
+function recompute(){
+  S.curve=buildCurve(S.hh,S.rr,S.h,S.R1,S.r1,S.rf);
+  S.keys=keyPts(S.curve.xs,S.curve.f1s);
+}
+
+// ═══════════════════════════════════════════════════
+// 绘图
+// ═══════════════════════════════════════════════════
+const PAD={l:60,r:28,t:38,b:56};
+
+function setupCV(){
+  const cv=document.getElementById('cv');
+  const dpr=window.devicePixelRatio||1;
+  const W=Math.floor(cv.parentElement.getBoundingClientRect().width||660);
+  const H=500;
+  cv.width=W*dpr; cv.height=H*dpr;
+  cv.style.width=W+'px'; cv.style.height=H+'px';
+  const ctx=cv.getContext('2d'); ctx.scale(dpr,dpr);
+  return {ctx,W,H};
+}
+
+function toP(lam,F,xMax,yMin,yMax,W,H){
+  const cW=W-PAD.l-PAD.r, cH=H-PAD.t-PAD.b;
+  return {
+    x: PAD.l+lam/xMax*cW,
+    y: PAD.t+(1-(F-yMin)/(yMax-yMin))*cH
+  };
+}
+
+function grid(ctx,W,H,xMax,yMin,yMax){
+  const cW=W-PAD.l-PAD.r, cH=H-PAD.t-PAD.b;
+  // 背景
+  ctx.fillStyle='#fafbfd'; ctx.fillRect(PAD.l,PAD.t,cW,cH);
+  // 网格
+  ctx.strokeStyle='rgba(0,0,0,0.055)'; ctx.lineWidth=0.5;
+  for(let i=0;i<=8;i++){
+    const x=PAD.l+i/8*cW;
+    ctx.beginPath();ctx.moveTo(x,PAD.t);ctx.lineTo(x,PAD.t+cH);ctx.stroke();
+  }
+  for(let i=0;i<=6;i++){
+    const y=PAD.t+i/6*cH;
+    ctx.beginPath();ctx.moveTo(PAD.l,y);ctx.lineTo(PAD.l+cW,y);ctx.stroke();
+  }
+  // 零线
+  if(yMin<0&&yMax>0){
+    const y0=PAD.t+(1-(-yMin)/(yMax-yMin))*cH;
+    ctx.strokeStyle='rgba(0,0,0,0.2)'; ctx.lineWidth=0.8; ctx.setLineDash([4,4]);
+    ctx.beginPath();ctx.moveTo(PAD.l,y0);ctx.lineTo(PAD.l+cW,y0);ctx.stroke();
+    ctx.setLineDash([]);
+  }
+  // 框
+  ctx.strokeStyle='#aab'; ctx.lineWidth=1;
+  ctx.strokeRect(PAD.l,PAD.t,cW,cH);
+  // X刻度
+  ctx.fillStyle='#666'; ctx.font='11px sans-serif'; ctx.textAlign='center';
+  for(let i=0;i<=8;i++){
+    const v=xMax*i/8;
+    ctx.fillText(v.toFixed(1),PAD.l+i/8*cW,PAD.t+cH+16);
+  }
+  ctx.fillStyle='#888'; ctx.font='12px sans-serif';
+  ctx.fillText('λ₁  变形量（mm）',PAD.l+cW/2,H-5);
+  // Y刻度
+  ctx.textAlign='right';
+  for(let i=0;i<=6;i++){
+    const v=yMin+(yMax-yMin)*i/6;
+    const y=PAD.t+(1-i/6)*cH;
+    ctx.fillStyle='#666'; ctx.font='11px sans-serif';
+    ctx.fillText(Math.abs(v)>=1000?(v/1000).toFixed(1)+'k':v.toFixed(0),PAD.l-5,y+4);
+  }
+  ctx.save();
+  ctx.translate(13,PAD.t+cH/2); ctx.rotate(-Math.PI/2);
+  ctx.fillStyle='#888'; ctx.font='12px sans-serif'; ctx.textAlign='center';
+  ctx.fillText('F（N）',0,0); ctx.restore();
+}
+
+function line(ctx,pts,col,w,dash=[]){
+  if(!pts.length)return;
+  ctx.strokeStyle=col; ctx.lineWidth=w; ctx.setLineDash(dash);
+  ctx.beginPath(); ctx.moveTo(pts[0].x,pts[0].y);
+  for(let i=1;i<pts.length;i++) ctx.lineTo(pts[i].x,pts[i].y);
+  ctx.stroke(); ctx.setLineDash([]);
+}
+
+function dot(ctx,x,y,r,fill,stroke,label,dir='top'){
+  ctx.fillStyle=fill; ctx.strokeStyle=stroke; ctx.lineWidth=1.8;
+  ctx.beginPath(); ctx.arc(x,y,r,0,Math.PI*2); ctx.fill(); ctx.stroke();
+  if(label){
+    ctx.fillStyle=stroke; ctx.font='bold 13px sans-serif'; ctx.textAlign='center';
+    if(dir==='top')    ctx.fillText(label,x,y-r-6);
+    if(dir==='bottom') ctx.fillText(label,x,y+r+13);
+    if(dir==='left') { ctx.textAlign='right'; ctx.fillText(label,x-r-5,y+4); }
+    if(dir==='right'){ ctx.textAlign='left';  ctx.fillText(label,x+r+5,y+4); }
+  }
+}
+
+// 垂直参考线
+function vline(ctx,x,yTop,yBot,col,label,labelY){
+  ctx.strokeStyle=col; ctx.lineWidth=0.9; ctx.setLineDash([5,3]);
+  ctx.beginPath(); ctx.moveTo(x,yTop); ctx.lineTo(x,yBot); ctx.stroke();
+  ctx.setLineDash([]);
+  if(label){
+    ctx.fillStyle=col; ctx.font='12px sans-serif'; ctx.textAlign='center';
+    ctx.fillText(label,x,labelY);
+  }
+}
+
+// 水平参考线（虚）
+function hline(ctx,y,xLeft,xRight,col){
+  ctx.strokeStyle=col; ctx.lineWidth=0.9; ctx.setLineDash([3,3]);
+  ctx.beginPath(); ctx.moveTo(xLeft,y); ctx.lineTo(xRight,y); ctx.stroke();
+  ctx.setLineDash([]);
+}
+
+// Δλ 区间注释（A到B之间）
+function drawDelta(ctx,xA,xB,yTop,yBot){
+  // 阴影
+  ctx.fillStyle='rgba(55,138,221,0.11)';
+  ctx.fillRect(xA,yTop,xB-xA,yBot-yTop);
+  // 双向箭头
+  const yA=yBot+10;
+  ctx.strokeStyle='#185fa5'; ctx.lineWidth=1.2; ctx.setLineDash([]);
+  ctx.beginPath(); ctx.moveTo(xA,yA); ctx.lineTo(xB,yA); ctx.stroke();
+  [[xA,1],[xB,-1]].forEach(([x,d])=>{
+    ctx.beginPath(); ctx.moveTo(x,yA);
+    ctx.lineTo(x+d*7,yA-4); ctx.lineTo(x+d*7,yA+4);
+    ctx.closePath(); ctx.fillStyle='#185fa5'; ctx.fill();
+  });
+  ctx.fillStyle='#185fa5'; ctx.font='11px sans-serif'; ctx.textAlign='center';
+  ctx.fillText('← Δλ →',(xA+xB)/2,yA+13);
+}
+
+// ═══════════════════════════════════════════════════
+// 主绘制
+// ═══════════════════════════════════════════════════
+function redraw(){
+  const {ctx,W,H}=setupCV();
+  const {xs,f1s,f2s,R,r}=S.curve;
+  const {iM,iH,iN}=S.keys;
+  const {kB,dlam,kC,step}=S;
+
+  const xMax=xs[xs.length-1];
+  const fMax=Math.max(...f1s,...f2s)*1.10;
+  const fMin=Math.min(Math.min(...f1s,0),Math.min(...f2s,0))-fMax*0.04;
+  const cH=H-PAD.t-PAD.b, cW=W-PAD.l-PAD.r;
+
+  function p(lam,F){ return toP(lam,F,xMax,fMin,fMax,W,H); }
+
+  // 关键点坐标
+  const lamM=xs[iM],FM=f1s[iM];
+  const lamH=xs[iH],FH=f1s[iH];
+  const lamN=xs[iN],FN=f1s[iN];
+
+  // B、A、C
+  const lamB=kB*lamH;
+  const lamA=Math.max(0, lamB-dlam);            // A 在 B 左侧
+  const lamC=kC*lamN;
+  const F1B=F1(lamB,S.curve.H,S.curve.h,S.curve.R,r,S.R1,S.r1);
+  const F1A=F1(lamA,S.curve.H,S.curve.h,S.curve.R,r,S.R1,S.r1);
+  const F1C=F1(lamC,S.curve.H,S.curve.h,S.curve.R,r,S.R1,S.r1);
+  // 式(2-23): F₂C = (R₁−r₁)/(r₁−r_f) · F₁C
+  const lMul=leverMultiplier(S.R1,S.r1,S.rf);  // (R₁−r₁)/(r₁−r_f)，大于1
+  const F2C=F2fromF1(F1C,S.R1,S.r1,S.rf);
+
+  // 更新数值格
+  const fmt=v=>v.toFixed(2)+' mm';
+  document.getElementById('kv-lam1B').textContent=fmt(lamB);
+  document.getElementById('kv-F1B').textContent  =Math.max(0,F1B).toFixed(0)+' N';
+  document.getElementById('kv-lam1A').textContent=fmt(lamA);
+  document.getElementById('kv-F1A').textContent  =Math.max(0,F1A).toFixed(0)+' N';
+  const dFpct=F1B>1?Math.abs(F1A-F1B)/F1B*100:0;
+  document.getElementById('kv-dF').textContent   =dFpct.toFixed(1)+'%';
+  document.getElementById('kv-dlam2').textContent=dlam.toFixed(1)+' mm';
+  document.getElementById('kv-lam1C').textContent=fmt(lamC);
+  document.getElementById('kv-F2C').textContent  =Math.max(0,F2C).toFixed(0)+' N';
+  document.getElementById('kv-stroke').textContent=(lamC-lamB).toFixed(2)+' mm';
+  document.getElementById('kv-F1C').textContent  =Math.max(0,F1C).toFixed(0)+' N';
+  // 杠杆相关
+  document.getElementById('kv-lev').textContent  =lMul.toFixed(4);
+  const lam2atC=lamC*(S.r1-S.rf)/(S.R1-S.r1);
+  document.getElementById('kv-lam2').textContent =lam2atC.toFixed(3)+' mm';
+  // 杠杆比框
+  const levBox=document.getElementById('lever-box');
+  if(levBox) levBox.innerHTML=
+    `<b>式(2-22)：</b>λ₂ = (r₁−r_f)/(R₁−r₁) · λ₁<br>`+
+    `<b>式(2-23)：</b>F₂ = <b>(R₁−r₁)/(r₁−r_f)</b> · F₁<br>`+
+    `(R₁−r₁)/(r₁−r_f) = (${S.R1}−${S.r1})/(${S.r1}−${S.rf}) = `+
+    `${S.R1-S.r1}/${S.r1-S.rf} = <b>${lMul.toFixed(4)}</b>`+
+    `（F₂ 是 F₁ 的 ${lMul.toFixed(2)} 倍）`;
+
+  // ── 绘制背景 ──
+  ctx.clearRect(0,0,W,H);
+  grid(ctx,W,H,xMax,fMin,fMax);
+
+  // ── F₂ 曲线（step>=2）──
+  if(step>=2){
+    const pts=xs.map((lam,i)=>p(lam,f2s[i]));
+    line(ctx,pts,'#E24B4A',1.5,[6,4]);
+  }
+
+  // ── F₁ 主曲线 ──
+  const pts1=xs.map((lam,i)=>p(lam,f1s[i]));
+  line(ctx,pts1,'#378ADD',2.5);
+
+  // ── M、H、N 垂直参考线（始终显示）──
+  const yBot=PAD.t+cH, yLbl=PAD.t+cH+30;
+  vline(ctx,p(lamM,0).x,PAD.t,yBot,'#c04820','λ₁ₘ',yLbl);
+  vline(ctx,p(lamH,0).x,PAD.t,yBot,'#185fa5','λ₁ₕ',yLbl);
+  vline(ctx,p(lamN,0).x,PAD.t,yBot,'#27500a','λ₁ₙ',yLbl);
+
+  // ── M、H、N 点标注（始终显示）──
+  { const q=p(lamM,FM); dot(ctx,q.x,q.y,6,'#FAC775','#c04820','M','top'); }
+  { const q=p(lamH,FH); dot(ctx,q.x,q.y,6,'#85B7EB','#185fa5','H','top'); }
+  { const q=p(lamN,FN); dot(ctx,q.x,q.y,6,'#97C459','#27500a','N','bottom'); }
+
+  // ── Δλ 区间阴影 + A、B点（step>=1）──
+  if(step>=1){
+    const pA=p(lamA,F1A), pB=p(lamB,F1B);
+    drawDelta(ctx,pA.x,pB.x,PAD.t,yBot);
+
+    // F₁A、F₁B 水平虚线
+    hline(ctx,pB.y,PAD.l,pB.x,'rgba(26,107,128,0.55)');
+    hline(ctx,pA.y,PAD.l,pA.x,'rgba(26,107,128,0.35)');
+
+    // 左侧 F 标签
+    ctx.font='11px sans-serif'; ctx.textAlign='left';
+    ctx.fillStyle='#1a6b80';
+    ctx.fillText(`F₁B = ${Math.max(0,F1B).toFixed(0)} N`,PAD.l+3,pB.y-4);
+    if(Math.abs(pA.y-pB.y)>10){
+      ctx.fillStyle='rgba(26,107,128,0.7)';
+      ctx.fillText(`F₁A = ${Math.max(0,F1A).toFixed(0)} N`,PAD.l+3,pA.y-4);
+    }
+
+    // λ1B、λ1A 垂直参考线
+    vline(ctx,pB.x,PAD.t,yBot,'rgba(26,107,128,0.5)','λ₁B',yLbl+14);
+    if(lamA>0.01) vline(ctx,pA.x,PAD.t,yBot,'rgba(26,107,128,0.35)','λ₁A',yLbl+14);
+
+    // A点、B点
+    dot(ctx,pA.x,pA.y,6,'#CDE8C0','#3b6d11','A','top');
+    dot(ctx,pB.x,pB.y,7,'#5DCAA5','#1a6b80','B','top');
+  }
+
+  // ── C点（step>=2）──
+  if(step>=2){
+    const pC=p(lamC,F1C), pCf=p(lamC,F2C);
+    vline(ctx,pC.x,PAD.t,yBot,'rgba(163,45,45,0.55)','λ₁C',yLbl+28);
+    hline(ctx,pCf.y,PAD.l,pC.x,'rgba(163,45,45,0.45)');
+    ctx.fillStyle='#a32d2d'; ctx.font='11px sans-serif'; ctx.textAlign='left';
+    ctx.fillText(`F₂C = ${Math.max(0,F2C).toFixed(0)} N`,PAD.l+3,pCf.y-4);
+    // 杠杆比标注（右上角）
+    const lx=W-PAD.r-2, ly=PAD.t+18;
+    ctx.textAlign='right'; ctx.font='11px sans-serif';
+    ctx.fillStyle='#a32d2d';
+    ctx.fillText(`式(2-23)：F₂C = (R₁−r₁)/(r₁−r_f) · F₁C`,lx,ly);
+    ctx.fillText(`= (${S.R1}−${S.r1})/(${S.r1}−${S.rf}) × ${Math.max(0,F1C).toFixed(0)}`,lx,ly+15);
+    ctx.fillText(`= ${(lMul).toFixed(3)} × ${Math.max(0,F1C).toFixed(0)} = ${Math.max(0,F2C).toFixed(0)} N`,lx,ly+30);
+
+    dot(ctx,pC.x,pC.y,7,'#F09595','#a32d2d','C','top');
+
+    // B→C 虚弧
+    const pB=p(lamB,F1B);
+    ctx.strokeStyle='rgba(26,107,128,0.65)'; ctx.lineWidth=1.8; ctx.setLineDash([3,3]);
+    ctx.beginPath(); ctx.moveTo(pB.x,pB.y);
+    ctx.quadraticCurveTo((pB.x+pC.x)/2,Math.min(pB.y,pC.y)-20,pC.x,pC.y);
+    ctx.stroke(); ctx.setLineDash([]);
+    ctx.fillStyle='#1a6b80'; ctx.font='11px sans-serif'; ctx.textAlign='center';
+    ctx.fillText('踩踏板 B→C',(pB.x+pC.x)/2,Math.min(pB.y,pC.y)-26);
+  }
+
+  // ── 图标题 ──
+  const titles=['特性曲线全貌（M、H、N 三点始终标注）',
+    '设定 B 接合点  ·  A 为磨损极限后工作点（A 在 B 左侧）',
+    '设定 C 分离点  ·  C 点靠近 N（极小值）',
+    '工作点设定完成'];
+  ctx.fillStyle='#1e2a35'; ctx.font='bold 13px sans-serif'; ctx.textAlign='left';
+  ctx.fillText(titles[step],PAD.l,24);
+
+  // ── 底部注释 ──
+  const anns=[
+    'H/h 高厚比决定曲线形态；√2 < H/h < 2√2 时出现 M、H、N 三点，适合离合器膜片弹簧',
+    'A 点 = 摩擦片磨损 Δλ 后的工作点（λ₁A = λ₁B − Δλ）；B 靠近 H 使 F₁A ≈ F₁B',
+    'C 越靠近 N，踏板力 F₂C 越小；C 点超过 N 后踏板力反而增大',
+    '查看左侧评分结果，返回步骤②③调整参数'
+  ];
+  document.getElementById('ann').textContent=anns[step];
+}
+
+// ═══════════════════════════════════════════════════
+// 解读文字
+// ═══════════════════════════════════════════════════
+function updateExplain(){
+  const {xs,f1s}=S.curve;
+  const {iM,iH,iN}=S.keys;
+  const lamM=xs[iM], FM=f1s[iM];
+  const lamH=xs[iH], FH=f1s[iH];
+  const lamN=xs[iN], FN=f1s[iN];
+  const lamB=S.kB*lamH, lamA=Math.max(0,lamB-S.dlam), lamC=S.kC*lamN;
+  const F1B =F1(lamB,S.curve.H,S.curve.h,S.curve.R,S.curve.r,S.R1,S.r1);
+  const F1A =F1(lamA,S.curve.H,S.curve.h,S.curve.R,S.curve.r,S.R1,S.r1);
+  const F1C =F1(lamC,S.curve.H,S.curve.h,S.curve.R,S.curve.r,S.R1,S.r1);
+  const lMul=leverMultiplier(S.R1,S.r1,S.rf);
+  const F2C =F2fromF1(F1C,S.R1,S.r1,S.rf);
+  const dFpct=F1B>1?Math.abs(F1A-F1B)/F1B*100:0;
+  const stroke=(lamC-lamB).toFixed(2);
+
+  // ── 步骤①：三关键点 ──
+  const c0=
+`<div class="ib ib-amber"><b>三个关键点的物理含义</b></div>
+<div class="ib ib-amber" style="margin-top:6px">
+  <b>M — 极大值</b>（λ₁ₘ = ${lamM.toFixed(2)} mm，F₁ₘ = ${FM.toFixed(0)} N）<br>
+  弹力最大点，刚度 k = dF/dλ = 0（切线水平）。<br>
+  工作点不应在 M 左侧（弹力随变形增大太快，压紧力不稳）。
+</div>
+<div class="ib ib-blue" style="margin-top:4px">
+  <b>H — 拐点</b>（λ₁ₕ = ${lamH.toFixed(2)} mm，F₁ₕ = ${FH.toFixed(0)} N）<br>
+  λ₁ₕ = (λ₁ₘ + λ₁ₙ)/2。H 点附近曲线最平坦，<b>是 B 点的理想位置</b>。
+</div>
+<div class="ib ib-green" style="margin-top:4px">
+  <b>N — 极小值</b>（λ₁ₙ = ${lamN.toFixed(2)} mm，F₁ₙ = ${FN.toFixed(0)} N）<br>
+  弹力局部最低，分离力最省力，<b>是 C 点的理想位置</b>。
+</div>`;
+
+  // ── 步骤②：B点与A点 ──
+  const c1=
+`<div class="ib ib-gray"><b>B 点与 A 点的关系（图 2-17 核心逻辑）</b></div>
+<div class="ib ib-blue" style="margin-top:6px">
+  <b>摩擦片磨损方向</b><br>
+  摩擦片磨损变薄 Δλ → 压盘向飞轮方向移动 Δλ<br>
+  → 弹簧压缩量<b>减小</b> Δλ → 工作点从 B <b>向左移</b>到 A<br>
+  ∴ λ₁A = λ₁B − Δλ = ${lamB.toFixed(2)} − ${S.dlam.toFixed(1)} = ${lamA.toFixed(2)} mm
+</div>
+<div class="ib ib-green" style="margin-top:4px">
+  <b>为什么 B 靠近 H？</b><br>
+  H 点附近曲线最平坦（二阶导数≈0），B→A 移动时 F₁ 变化最小。<br>
+  当前波动：F₁B = ${F1B.toFixed(0)} N，F₁A = ${F1A.toFixed(0)} N，
+  <b>波动 ${dFpct.toFixed(1)}%</b>。
+</div>
+<div class="ib ${dFpct<8?'ib-green':dFpct<15?'ib-amber':'ib-red'}" style="margin-top:4px">
+  ${dFpct<5 ?'✓ 优秀：B 点非常靠近 H，磨损前后压紧力几乎不变。':
+    dFpct<10?'✓ 良好：压紧力波动在合理范围内。':
+    dFpct<18?'△ 偏离：建议将 kB 调到 0.85~1.0。':
+             '✗ 不合格：B 点过于偏离 H，磨损后压紧力变化过大！'}
+</div>`;
+
+  // ── 步骤③：C点设定 ──
+  const c2=
+`<div class="ib ib-gray"><b>C 点设定逻辑 + 式(2-23) 计算过程</b></div>
+<div class="ib ib-blue" style="margin-top:6px">
+  <b>式(2-22)：</b>λ₂ = (r₁−r_f)/(R₁−r₁) · λ₁　（行程缩小）<br>
+  <b>式(2-23)：</b>F₂ = <b>(R₁−r₁)/(r₁−r_f) · F₁</b>　（力放大）<br><br>
+  (R₁−r₁)/(r₁−r_f) = (${S.R1}−${S.r1})/(${S.r1}−${S.rf})
+  = ${S.R1-S.r1}/${S.r1-S.rf} = <b>${lMul.toFixed(4)}</b><br>
+  F₁C = ${Math.max(0,F1C).toFixed(0)} N<br>
+  F₂C = ${lMul.toFixed(4)} × ${Math.max(0,F1C).toFixed(0)}
+  = <b>${Math.max(0,F2C).toFixed(0)} N</b><br>
+  分离行程 = λ₁C − λ₁B = ${stroke} mm
+</div>
+<div class="ib ${S.kC>0.85&&S.kC<1.05?'ib-green':S.kC<=0.75?'ib-red':'ib-amber'}" style="margin-top:4px">
+  ${S.kC<0.75?'△ C 点太靠左，分离可能不彻底。':
+    S.kC<0.88?'△ C 点偏左，踏板力偏大。':
+    S.kC<=1.03?'✓ C 点在 N 点附近，踏板力最优，分离可靠。':
+    S.kC<=1.10?'C 点稍超 N 点，踏板力略增，尚可接受。':
+               '✗ C 点远超 N 点，踏板力过大！'}
+</div>`;
+
+  // ── 步骤④：综合评分页左侧汇总 ──
+  const sB  =dFpct<5?5:dFpct<10?4:dFpct<15?3:dFpct<20?2:1;
+  const sC  =S.kC>0.90&&S.kC<1.05?5:S.kC>0.80&&S.kC<1.10?4:S.kC>0.70?3:2;
+  const sHH =S.hh>=1.5&&S.hh<=2.0?5:S.hh>1.4&&S.hh<2.2?4:3;
+  const tot =sB+sC+sHH;
+  const star=n=>'★'.repeat(n)+'☆'.repeat(5-n);
+
+  const c3=
+`<div class="ib ib-amber"><b>三个关键点的物理含义</b></div>
+<div class="ib ib-amber" style="margin-top:6px">
+  <b>M — 极大值</b>（λ₁ₘ = ${lamM.toFixed(2)} mm，F₁ₘ = ${FM.toFixed(0)} N）<br>
+  弹力最大点，刚度 k = dF/dλ = 0（切线水平）。<br>
+  工作点不应在 M 左侧（弹力随变形增大太快，压紧力不稳）。
+</div>
+<div class="ib ib-blue" style="margin-top:4px">
+  <b>H — 拐点</b>（λ₁ₕ = ${lamH.toFixed(2)} mm，F₁ₕ = ${FH.toFixed(0)} N）<br>
+  λ₁ₕ = (λ₁ₘ + λ₁ₙ)/2。H 点附近曲线最平坦，是 B 点的理想位置。
+</div>
+<div class="ib ib-green" style="margin-top:4px">
+  <b>N — 极小值</b>（λ₁ₙ = ${lamN.toFixed(2)} mm，F₁ₙ = ${FN.toFixed(0)} N）<br>
+  弹力局部最低，分离力最省力，是 C 点的理想位置。
+</div>
+<div class="ib ib-gray" style="margin-top:8px"><b>B 点与 A 点的关系（图 2-17 核心逻辑）</b></div>
+<div class="ib ib-blue" style="margin-top:4px">
+  <b>摩擦片磨损方向</b><br>
+  摩擦片磨损变薄 Δλ → 压盘向飞轮方向移动 Δλ<br>
+  → 弹簧压缩量<b>减小</b> Δλ → 工作点从 B <b>向左移</b>到 A<br>
+  ∴ λ₁A = λ₁B − Δλ = ${lamB.toFixed(2)} − ${S.dlam.toFixed(1)} = ${lamA.toFixed(2)} mm
+</div>
+<div class="ib ib-green" style="margin-top:4px">
+  <b>为什么 B 靠近 H？</b><br>
+  H 点附近曲线最平坦（二阶导数≈0），B→A 移动时 F₁ 变化最小。<br>
+  当前波动：F₁B = ${F1B.toFixed(0)} N，F₁A = ${F1A.toFixed(0)} N，
+  <b>波动 ${dFpct.toFixed(1)}%</b>。
+</div>
+<div class="ib ${dFpct<8?'ib-green':dFpct<15?'ib-amber':'ib-red'}" style="margin-top:4px">
+  ${dFpct<5 ?'✓ 优秀：B 点非常靠近 H，磨损前后压紧力几乎不变。':
+    dFpct<10?'✓ 良好：压紧力波动在合理范围内。':
+    dFpct<18?'△ 偏离：建议将 kB 调到 0.85~1.0。':
+             '✗ 不合格：B 点过于偏离 H，磨损后压紧力变化过大！'}
+</div>
+<div class="ib ib-gray" style="margin-top:8px"><b>C 点设定逻辑</b></div>
+<div class="ib ib-blue" style="margin-top:4px">
+  分离时弹簧从 B 继续压缩到 C（λ₁C > λ₁B）。<br>
+  N 点是 F₁ 最低处，F₂ 也最小，即踏板最轻。<br>
+  当前：F₂C = ${Math.max(0,F2C).toFixed(0)} N，
+  分离行程 = ${stroke} mm
+</div>
+<div class="ib ${S.kC>0.85&&S.kC<1.05?'ib-green':S.kC<=0.75?'ib-red':'ib-amber'}" style="margin-top:4px">
+  ${S.kC<=1.03?'✓ C 点在 N 点附近，踏板力最优，分离可靠。':
+    S.kC<=1.10?'C 点稍超 N 点，踏板力略增，尚可接受。':
+               '✗ C 点远超 N 点，踏板力过大！'}
+</div>
+<div class="ib ib-gray" style="margin-top:8px"><b>各步骤汇总</b></div>
+<div class="ib ib-blue" style="margin-top:4px">
+  B 点：λ₁B = ${lamB.toFixed(2)} mm，A 点：λ₁A = ${lamA.toFixed(2)} mm，
+  Δλ = ${S.dlam.toFixed(1)} mm，压紧力波动 ${dFpct.toFixed(1)}%
+</div>
+<div class="ib ib-blue" style="margin-top:4px">
+  C 点：λ₁C = ${lamC.toFixed(2)} mm，F₂C = ${Math.max(0,F2C).toFixed(0)} N，
+  分离行程 ${stroke} mm
+</div>`;
+
+  // 写入 explain-body
+  const stepContent=[c0,c1,c2,c3];
+  document.getElementById('explain-body').innerHTML=stepContent[S.step]||'';
+
+  // 步骤④左侧评分卡
+  if(S.step===3){
+    document.getElementById('p3-content').innerHTML=
+`<table class="score-tbl">
+  <tr><th>评分项</th><th>得分</th><th>说明</th></tr>
+  <tr><td>B 点（压紧力波动）</td>
+      <td style="color:#1a6b80;font-weight:500">${star(sB)}</td>
+      <td style="color:#546070">波动 ${dFpct.toFixed(1)}%</td></tr>
+  <tr><td>C 点（踏板力）</td>
+      <td style="color:#1a6b80;font-weight:500">${star(sC)}</td>
+      <td style="color:#546070">kC = ${S.kC.toFixed(2)}</td></tr>
+  <tr><td>H/h 参数</td>
+      <td style="color:#1a6b80;font-weight:500">${star(sHH)}</td>
+      <td style="color:#546070">H/h = ${S.hh.toFixed(2)}（推荐1.5~2.0）</td></tr>
+  <tr style="background:#f5f6f8">
+    <td><b>综合</b></td>
+    <td colspan="2" style="font-weight:500;color:${tot>=12?'#27500a':tot>=9?'#633806':'#791f1f'}">
+      ${tot}/15 &nbsp;${tot>=13?'优秀 ✓':tot>=10?'良好':tot>=7?'合格':'需改进'}</td></tr>
+</table>
+<div class="ib ${tot>=12?'ib-green':tot>=9?'ib-amber':'ib-red'}" style="margin-top:8px">
+  ${tot>=12?
+    `工作点设定优秀！B 靠近 H（波动 ${dFpct.toFixed(1)}%），C 靠近 N（踏板力最小），参数合理。`:
+    tot>=9?
+    `设定基本合理，建议微调：kB 趋近 1.0，kC 趋近 1.0。`:
+    `需改进，重点检查：①B 点是否在 M~H 之间；②C 点是否靠近 N；③H/h 是否在 1.5~2.0。`}
+</div>`;
+  }
+}
+
+// ═══════════════════════════════════════════════════
+// 事件
+// ═══════════════════════════════════════════════════
+function onParam(){
+  S.hh=parseFloat(document.getElementById('sl-hh').value);
+  S.h =parseFloat(document.getElementById('sl-h').value);
+  S.rr=parseFloat(document.getElementById('sl-rr').value);
+  document.getElementById('v-hh').textContent=S.hh.toFixed(2);
+  document.getElementById('v-h').textContent =S.h.toFixed(1);
+  document.getElementById('v-rr').textContent=S.rr.toFixed(2);
+
+  const sq2=Math.sqrt(2), sq2x2=2*Math.sqrt(2), hh=S.hh;
+  const el=document.getElementById('p0-info');
+  if(hh<sq2){
+    el.textContent=`H/h=${hh.toFixed(2)} < √2：无 N 极小值点，不出现负刚度区，此情形不适合设分离工作点 C。`;
+    el.className='ib ib-amber';
+  } else if(hh<=2.0){
+    el.textContent=`H/h=${hh.toFixed(2)} ∈ (√2, 2.0)：教材推荐范围（1.5~2.0），M、H、N 三点清晰，最适合离合器。`;
+    el.className='ib ib-green';
+  } else if(hh<sq2x2){
+    el.textContent=`H/h=${hh.toFixed(2)} ∈ (2.0, 2√2)：超出推荐范围，负刚度区较深，压紧力稳定性变差。`;
+    el.className='ib ib-amber';
+  } else {
+    el.textContent=`H/h=${hh.toFixed(2)} > 2√2：弹力穿越零线，弹簧翻转，不可用于离合器！`;
+    el.className='ib ib-red';
+  }
+  recompute(); redraw(); updateExplain();
+}
+
+function onBChange(){
+  S.kB  =parseFloat(document.getElementById('sl-kb').value);
+  S.dlam=parseFloat(document.getElementById('sl-dlam').value);
+  document.getElementById('v-kb').textContent  =S.kB.toFixed(2);
+  document.getElementById('v-dlam').textContent=S.dlam.toFixed(1);
+  // 同步数字输入框
+  document.getElementById('num-dlam').value=S.dlam.toFixed(1);
+
+  const {iH}=S.keys, lamH=S.curve.xs[iH];
+  const lamB=S.kB*lamH, lamA=Math.max(0,lamB-S.dlam);
+  const F1Bv=F1(lamB,S.curve.H,S.curve.h,S.curve.R,S.curve.r,S.R1,S.r1);
+  const F1Av=F1(lamA,S.curve.H,S.curve.h,S.curve.R,S.curve.r,S.R1,S.r1);
+  const dFpct=F1Bv>1?Math.abs(F1Av-F1Bv)/F1Bv*100:0;
+
+  const el=document.getElementById('p1-info');
+  if(S.kB<0.70){el.textContent='B 点在 M 左侧，弹力仍在上升段，压紧力随磨损大幅变化。';el.className='ib ib-amber';}
+  else if(S.kB<0.80){el.textContent=`B 点偏离 H，波动 ${dFpct.toFixed(1)}%，建议调到 0.85~1.0。`;el.className='ib ib-amber';}
+  else if(S.kB<=1.0){el.textContent=`✓ B 点在推荐区间（0.8~1.0×λ₁ₕ），压紧力波动 ${dFpct.toFixed(1)}%。`;el.className='ib ib-green';}
+  else if(S.kB<=1.10){el.textContent=`B 点略超 H，进入负刚度区前段，波动 ${dFpct.toFixed(1)}%，尚可。`;el.className='ib ib-amber';}
+  else{el.textContent='✗ B 点进入负刚度区较深，磨损后压紧力急剧下降，不合格！';el.className='ib ib-red';}
+
+  redraw(); updateExplain();
+}
+
+function onDlamInput(){
+  const v=parseFloat(document.getElementById('num-dlam').value);
+  if(isNaN(v)||v<=0) return;
+  S.dlam=v;
+  document.getElementById('sl-dlam').value=Math.min(3.0,Math.max(0.3,v));
+  document.getElementById('v-dlam').textContent=v.toFixed(1);
+  redraw(); updateExplain();
+}
+
+function onLeverChange(){
+  S.R1=parseInt(document.getElementById('sl-R1').value);
+  S.r1=parseInt(document.getElementById('sl-r1').value);
+  S.rf=parseInt(document.getElementById('sl-rf').value);
+  document.getElementById('v-R1').textContent=S.R1;
+  document.getElementById('v-r1').textContent=S.r1;
+  document.getElementById('v-rf').textContent=S.rf;
+  // r_f < r₁ < R₁ 约束检查
+  if(S.rf>=S.r1||S.r1>=S.R1){
+    document.getElementById('lever-box').innerHTML=
+      '<b style="color:#791f1f">⚠ 参数约束：r_f &lt; r₁ &lt; R₁，请调整滑块！</b>';
+    return;
+  }
+  recompute(); redraw(); updateExplain();
+}
+
+function onCChange(){
+  S.kC=parseFloat(document.getElementById('sl-kc').value);
+  document.getElementById('v-kc').textContent=S.kC.toFixed(2);
+  const el=document.getElementById('p2-info');
+  if(S.kC<0.75){el.textContent='C 点太靠左，分离不彻底，无法完全切断动力。';el.className='ib ib-red';}
+  else if(S.kC<0.88){el.textContent='C 点偏左，踏板力偏大，建议调大。';el.className='ib ib-amber';}
+  else if(S.kC<=1.03){el.textContent='✓ C 点在 N 点附近，踏板力最小，分离可靠。';el.className='ib ib-green';}
+  else if(S.kC<=1.10){el.textContent='C 点略超 N，踏板力稍增，分离仍可靠。';el.className='ib ib-amber';}
+  else{el.textContent='✗ C 点远超 N，踏板力过大，违反设计准则！';el.className='ib ib-red';}
+  redraw(); updateExplain();
+}
+
+function setStep(n){
+  S.step=n;
+  document.querySelectorAll('.step-btn').forEach((b,i)=>b.classList.toggle('active',i===n));
+  ['p0','p1','p2','p3'].forEach((id,i)=>{
+    document.getElementById(id).style.display=i===n?'':'none';
+  });
+  redraw(); updateExplain();
+}
+
+// ── 初始化 ──
+window.addEventListener('load',()=>{ recompute(); onParam(); });
+
+// 防抖处理resize事件，优化移动端性能
+let resizeTimer;
+window.addEventListener('resize', () => {
+  clearTimeout(resizeTimer);
+  resizeTimer = setTimeout(() => {
+    redraw();
+  }, 150);
+});
+
+// 阻止移动端双击缩放
+let lastTouchEnd = 0;
+document.addEventListener('touchend', (e) => {
+  const now = Date.now();
+  if (now - lastTouchEnd <= 300) {
+    e.preventDefault();
+  }
+  lastTouchEnd = now;
+}, false);
+document.addEventListener('contextmenu', e => e.preventDefault());
+document.addEventListener('keydown', e => {
+if (e.key === 'F12' || 
+(e.ctrlKey && e.shiftKey && (e.key === 'I' || e.key === 'J' || e.key === 'C')) ||
+(e.ctrlKey && e.key === 'U') ||
+(e.ctrlKey && e.key === 'S')) {
+e.preventDefault();
+return false;
+}
+});
+
+</script>
+<script>
+  document.addEventListener('contextmenu', e => e.preventDefault());
+  document.addEventListener('keydown', e => {
+    if (e.key === 'F12' || 
+        (e.ctrlKey && e.shiftKey && (e.key === 'I' || e.key === 'J' || e.key === 'C')) ||
+        (e.ctrlKey && e.key === 'U') ||
+        (e.ctrlKey && e.key === 'S')) {
+      e.preventDefault();
+      return false;
+    }
+  });
+</script>
+
+</body>
+</html>
